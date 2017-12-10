@@ -1,0 +1,41 @@
+import time
+
+import multiprocessing as mp
+
+
+class Worker(mp.Process):
+    def __init__(self, workingQueue):
+        super(Worker, self).__init__()
+        self.workingQueue = workingQueue
+
+    def run(self):
+        while True:
+            task = self.workingQueue.get()
+
+            if task == None:
+                print ("Process {} exiting".format(self.name))
+                break
+            else:
+                print(self.name + " processing " + str(task))
+                time.sleep(0.1)
+
+        #return
+
+if __name__ == '__main__':
+    workingQueue = mp.Queue()
+
+    workers = [Worker(workingQueue) for _ in range(mp.cpu_count())]
+
+    for worker in workers:
+        worker.start()
+
+    for i in range(14):
+        workingQueue.put(i)
+
+    for _ in workers:
+        """Adding poison pill"""
+        workingQueue.put(None)
+
+    for worker in workers:
+        worker.join()
+    print ("done")
