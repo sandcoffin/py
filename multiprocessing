@@ -4,13 +4,13 @@ import multiprocessing as mp
 
 
 class Worker(mp.Process):
-    def __init__(self, workingQueue):
+    def __init__(self, taskQueue):
         super(Worker, self).__init__()
-        self.workingQueue = workingQueue
+        self.taskQueue = taskQueue
 
     def run(self):
         while True:
-            task = self.workingQueue.get()
+            task = self.taskQueue.get()
 
             if task == None:
                 print ("Process {} exiting".format(self.name))
@@ -22,19 +22,19 @@ class Worker(mp.Process):
         #return
 
 if __name__ == '__main__':
-    workingQueue = mp.Queue()
+    taskQueue = mp.Queue()
 
-    workers = [Worker(workingQueue) for _ in range(mp.cpu_count())]
+    workers = [Worker(taskQueue) for _ in range(mp.cpu_count())]
 
     for worker in workers:
         worker.start()
 
     for i in range(14):
-        workingQueue.put(i)
+        taskQueue.put(i)
 
     for _ in workers:
         """Adding poison pill"""
-        workingQueue.put(None)
+        taskQueue.put(None)
 
     for worker in workers:
         worker.join()
